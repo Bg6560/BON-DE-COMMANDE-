@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>BG Market — Commandes</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--gold:#c9a84c;--gold2:#f0d080;--dark:#0d0d1a;--dark2:#1a1a2e;--dark3:#16213e;--card:rgba(255,255,255,.05);--border:rgba(201,168,76,.22);--text:#e8e0d0;--muted:#777;--green:#4ade80;--red:#f87171;--blue:#60a5fa;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--dark);font-family:'DM Sans',sans-serif;color:var(--text);min-height:100vh;}
+
+/* SPLASH */
+#splash{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 40%,#1a1a2e 0%,#0d0d1a 100%);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s,visibility .6s;}
+#splash.hide{opacity:0;visibility:hidden;}
+.sp-ring{width:130px;height:130px;border-radius:32px;background:linear-gradient(145deg,#1a1a2e,#0d0d1a);border:2px solid rgba(201,168,76,.5);display:flex;align-items:center;justify-content:center;box-shadow:0 0 50px rgba(201,168,76,.2);animation:pulse 2s ease-in-out infinite;margin-bottom:24px;text-align:center;}
+@keyframes pulse{0%,100%{box-shadow:0 0 30px rgba(201,168,76,.15)}50%{box-shadow:0 0 70px rgba(201,168,76,.35)}}
+.sp-bg{font-family:'Playfair Display',serif;font-size:40px;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;}
+.sp-mkt{font-size:10px;font-weight:700;letter-spacing:5px;color:rgba(201,168,76,.7);text-transform:uppercase;margin-top:4px;}
+.sp-line{width:50px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:14px auto;}
+.sp-sub{font-size:12px;color:var(--muted);letter-spacing:1px;}
+.sp-dots{display:flex;gap:8px;margin-top:40px;}
+.sp-dot{width:7px;height:7px;border-radius:50%;background:rgba(201,168,76,.3);animation:dp 1.2s ease-in-out infinite;}
+.sp-dot:nth-child(2){animation-delay:.2s}.sp-dot:nth-child(3){animation-delay:.4s}
+@keyframes dp{0%,80%,100%{background:rgba(201,168,76,.25);transform:scale(.8)}40%{background:var(--gold2);transform:scale(1.2)}}
+
+/* NAV */
+.nav{background:var(--dark2);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:800;background:linear-gradient(90deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.nav-sub{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+
+/* TABS */
+.tabs{display:flex;background:var(--dark2);border-bottom:1px solid var(--border);}
+.tab{flex:1;padding:11px 6px;text-align:center;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;user-select:none;}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+/* PAGES */
+.page{display:none;padding:14px 14px 70px;}
+.page.active{display:block;}
+
+/* FORM */
+.sec{margin-bottom:18px;}
+.sec-title{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.field{margin-bottom:10px;}
+.field label{display:block;font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 13px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;transition:border-color .2s;appearance:none;-webkit-appearance:none;}
+.field textarea{min-height:70px;resize:vertical;line-height:1.5;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold);}
+.field input::placeholder,.field textarea::placeholder{color:#444;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+
+/* SELECT ARROW */
+.sel-wrap{position:relative;}
+.sel-wrap::after{content:'▾';position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--gold);pointer-events:none;font-size:14px;}
+
+/* PAIEMENT CHIPS */
+.payment-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:8px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap;}
+.chip.active{background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold2);}
+.chip:active{transform:scale(.96);}
+
+/* EXPEDITION TOGGLE */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.toggle-label{font-size:13px;font-weight:600;}
+.toggle{width:46px;height:26px;background:rgba(255,255,255,.12);border-radius:13px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--gold);}
+.toggle::after{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.4);}
+.toggle.on::after{transform:translateX(20px);}
+.expedition-block{display:none;}
+.expedition-block.show{display:block;}
+
+/* PRIX TOTAL */
+.total-box{background:linear-gradient(135deg,rgba(201,168,76,.12),rgba(74,222,128,.06));border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.total-label{font-size:11px;color:var(--muted);margin-bottom:3px;}
+.total-val{font-size:22px;font-weight:800;color:var(--gold2);}
+
+/* BUTTONS */
+.btn{width:100%;padding:14px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;margin-bottom:10px;display:block;transition:opacity .15s;}
+.btn-gold{background:linear-gradient(90deg,var(--gold),var(--gold2));color:#0d0d1a;}
+.btn-wa{background:linear-gradient(90deg,#25D366,#128C7E);color:#fff;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--gold);}
+.btn-red{background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.3);color:var(--red);}
+.btn:active{opacity:.85;}
+.btn2row{display:flex;gap:8px;}
+.btn2row .btn{flex:1;padding:12px;font-size:12px;margin-bottom:0;}
+
+/* RECU */
+#recu-wrap{background:var(--dark2);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:16px;}
+.recu-header{background:linear-gradient(135deg,#1a1a2e,#0d1929);padding:20px;text-align:center;border-bottom:1px solid var(--border);position:relative;}
+.recu-header::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.recu-logo{font-family:'Playfair Display',serif;font-size:26px;font-weight:800;background:linear-gradient(90deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.recu-tagline{font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:3px;}
+.recu-badge{display:inline-block;background:rgba(201,168,76,.15);border:1px solid var(--border);border-radius:20px;padding:4px 14px;font-size:10px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-top:10px;}
+.recu-body{padding:16px;}
+.recu-section{margin-bottom:16px;}
+.recu-stitle{font-size:9px;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid rgba(201,168,76,.15);}
+.recu-row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;gap:12px;}
+.recu-key{font-size:11px;color:var(--muted);flex-shrink:0;}
+.recu-val{font-size:12px;font-weight:600;text-align:right;color:var(--text);}
+.recu-val.gold{color:var(--gold2);}
+.recu-val.green{color:var(--green);}
+.recu-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);margin:10px 0;}
+.recu-total-row{display:flex;justify-content:space-between;align-items:center;background:rgba(201,168,76,.08);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:10px;}
+.recu-total-key{font-size:12px;font-weight:700;color:var(--text);}
+.recu-total-val{font-size:18px;font-weight:800;color:var(--gold2);}
+.recu-footer{background:rgba(255,255,255,.02);padding:14px;text-align:center;border-top:1px solid var(--border);}
+.recu-footer-txt{font-size:10px;color:var(--muted);line-height:1.7;}
+.mode-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;}
+.mode-livraison{background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);color:var(--blue);}
+.mode-orange{background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.3);color:#fb923c;}
+.mode-mtn{background:rgba(250,204,21,.12);border:1px solid rgba(250,204,21,.3);color:#facc15;}
+.mode-wave{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:#34d399;}
+.mode-moov{background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);color:#818cf8;}
+.exp-badge{display:inline-block;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);border-radius:6px;padding:2px 8px;font-size:10px;color:var(--green);font-weight:700;}
+
+/* HISTORIQUE */
+.hitem{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;}
+.hitem-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.hitem-name{font-weight:700;font-size:14px;}
+.hitem-model{font-size:12px;color:var(--gold2);margin-bottom:4px;}
+.hitem-meta{font-size:11px;color:var(--muted);}
+.hitem-actions{display:flex;gap:6px;margin-top:10px;}
+.small-btn{padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid;background:transparent;font-family:'DM Sans',sans-serif;}
+.tag{display:inline-block;background:rgba(201,168,76,.15);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:10px;color:var(--gold);font-weight:700;}
+.empty{text-align:center;padding:50px 20px;color:var(--muted);}
+.empty-ico{font-size:44px;margin-bottom:12px;}
+.empty-txt{font-size:13px;line-height:1.7;}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="sp-ring">
+    <div><div class="sp-bg">BG</div><div class="sp-mkt">MARKET</div></div>
+  </div>
+  <div class="sp-line"></div>
+  <div class="sp-sub">Gestion des Commandes</div>
+  <div class="sp-dots">
+    <div class="sp-dot"></div><div class="sp-dot"></div><div class="sp-dot"></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div><div class="nav-logo">BG Market</div><div class="nav-sub">Commandes</div></div>
+  <div style="font-size:24px">🛒</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="goTab('form',this)">✏️ Commande</div>
+  <div class="tab" onclick="goTab('recu',this)">📄 Bon de commande</div>
+  <div class="tab" onclick="goTab('hist',this)">🕒 Historique</div>
+</div>
+
+<!-- ===== PAGE FORMULAIRE ===== -->
+<div class="page active" id="pg-form">
+
+  <!-- INFOS CLIENT -->
+  <div class="sec">
+    <div class="sec-title">👤 Informations client</div>
+    <div class="field"><label>Nom complet *</label><input type="text" id="f-nom" placeholder="Ex: Jean Kouassi"/></div>
+    <div class="row2">
+      <div class="field"><label>Téléphone *</label><input type="tel" id="f-tel" placeholder="07 00 00 00 00"/></div>
+      <div class="field"><label>Quartier / Ville</label><input type="text" id="f-ville" placeholder="Ex: Cocody"/></div>
+    </div>
+  </div>
+
+  <!-- PRODUIT -->
+  <div class="sec">
+    <div class="sec-title">📱 Détails du produit</div>
+    <div class="field"><label>Modèle de téléphone *</label><input type="text" id="f-modele" placeholder="Ex: iPhone 15 Pro Max"/></div>
+    <div class="row3">
+      <div class="field">
+        <label>Stockage</label>
+        <div class="sel-wrap">
+          <select id="f-stockage">
+            <option value="">—</option>
+            <option>64 GB</option><option>128 GB</option><option>256 GB</option>
+            <option>512 GB</option><option>1 TB</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>RAM</label>
+        <div class="sel-wrap">
+          <select id="f-ram">
+            <option value="">—</option>
+            <option>4 GB</option><option>6 GB</option><option>8 GB</option>
+            <option>12 GB</option><option>16 GB</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Couleur</label><input type="text" id="f-couleur" placeholder="Ex: Noir"/></div>
+    </div>
+  </div>
+
+  <!-- PRIX -->
+  <div class="sec">
+    <div class="sec-title">💰 Tarification</div>
+    <div class="row2">
+      <div class="field"><label>Prix appareil (F) *</label><input type="number" id="f-prix" placeholder="0" oninput="calcTotal()"/></div>
+      <div class="field"><label>Frais livraison (F)</label><input type="number" id="f-livraison" placeholder="0" oninput="calcTotal()"/></div>
+    </div>
+    <div class="total-box">
+      <div><div class="total-label">Total à payer</div><div class="total-val" id="total-display">0 F</div></div>
+      <div style="font-size:22px">🧾</div>
+    </div>
+  </div>
+
+  <!-- PAIEMENT -->
+  <div class="sec">
+    <div class="sec-title">💳 Mode de paiement</div>
+    <div class="payment-chips">
+      <div class="chip" onclick="selectPay(this,'Paiement à la livraison')">🤝 À la livraison</div>
+      <div class="chip" onclick="selectPay(this,'Orange Money')">🟠 Orange Money</div>
+      <div class="chip" onclick="selectPay(this,'MTN Money')">🟡 MTN Money</div>
+      <div class="chip" onclick="selectPay(this,'Wave')">🌊 Wave</div>
+      <div class="chip" onclick="selectPay(this,'Moov Money')">💜 Moov Money</div>
+    </div>
+    <input type="hidden" id="f-paiement" value=""/>
+  </div>
+
+  <!-- EXPÉDITION -->
+  <div class="sec">
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">📦 Client hors Abidjan</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Activer si expédition requise</div>
+      </div>
+      <div class="toggle" id="exp-toggle" onclick="toggleExp()"></div>
+    </div>
+    <div class="expedition-block" id="exp-block">
+      <div class="row2">
+        <div class="field"><label>Ville de destination</label><input type="text" id="f-exp-ville" placeholder="Ex: Bouaké"/></div>
+        <div class="field"><label>Transporteur</label><input type="text" id="f-exp-transport" placeholder="Ex: CTM, Nsia..."/></div>
+      </div>
+      <div class="field"><label>Frais d'expédition (F)</label><input type="number" id="f-exp-frais" placeholder="0" oninput="calcTotal()"/></div>
+      <div class="field"><label>Instructions spéciales</label><textarea id="f-exp-note" placeholder="Ex: Appeler avant la livraison, fragile..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- NOTES -->
+  <div class="sec">
+    <div class="sec-title">📝 Notes fournisseur</div>
+    <div class="field"><textarea id="f-notes" placeholder="Instructions supplémentaires pour ton fournisseur..."></textarea></div>
+  </div>
+
+  <button class="btn btn-gold" onclick="genRecu()">📄 Générer le bon de commande</button>
+  <button class="btn btn-outline" onclick="resetForm()">🗑️ Effacer le formulaire</button>
+</div>
+
+<!-- ===== PAGE RECU ===== -->
+<div class="page" id="pg-recu">
+  <div class="empty" id="recu-empty">
+    <div class="empty-ico">📄</div>
+    <div class="empty-txt">Remplis le formulaire et génère<br>le bon de commande</div>
+  </div>
+  <div id="recu-container" style="display:none;">
+
+    <div id="recu-wrap">
+      <!-- HEADER -->
+      <div class="recu-header">
+        <div class="recu-logo">BG Market</div>
+        <div class="recu-tagline">Bon de Commande</div>
+        <div class="recu-badge" id="r-num">CMD-001</div>
+      </div>
+
+      <!-- BODY -->
+      <div class="recu-body">
+
+        <!-- Infos commande -->
+        <div class="recu-section">
+          <div class="recu-stitle">Infos commande</div>
+          <div class="recu-row"><span class="recu-key">N° Commande</span><span class="recu-val gold" id="r-numv">—</span></div>
+          <div class="recu-row"><span class="recu-key">Date</span><span class="recu-val" id="r-date">—</span></div>
+          <div class="recu-row"><span class="recu-key">Heure</span><span class="recu-val" id="r-heure">—</span></div>
+        </div>
+
+        <div class="recu-divider"></div>
+
+        <!-- Client -->
+        <div class="recu-section">
+          <div class="recu-stitle">👤 Client</div>
+          <div class="recu-row"><span class="recu-key">Nom</span><span class="recu-val" id="r-nom">—</span></div>
+          <div class="recu-row"><span class="recu-key">Téléphone</span><span class="recu-val" id="r-tel">—</span></div>
+          <div class="recu-row" id="r-ville-row" style="display:none;"><span class="recu-key">Ville</span><span class="recu-val" id="r-ville">—</span></div>
+        </div>
+
+        <div class="recu-divider"></div>
+
+        <!-- Produit -->
+        <div class="recu-section">
+          <div class="recu-stitle">📱 Produit commandé</div>
+          <div class="recu-row"><span class="recu-key">Modèle</span><span class="recu-val gold" id="r-modele">—</span></div>
+          <div class="recu-row" id="r-stockage-row"><span class="recu-key">Stockage</span><span class="recu-val" id="r-stockage">—</span></div>
+          <div class="recu-row" id="r-ram-row"><span class="recu-key">RAM</span><span class="recu-val" id="r-ram">—</span></div>
+          <div class="recu-row" id="r-couleur-row"><span class="recu-key">Couleur</span><span class="recu-val" id="r-couleur">—</span></div>
+        </div>
+
+        <div class="recu-divider"></div>
+
+        <!-- Prix -->
+        <div class="recu-section">
+          <div class="recu-stitle">💰 Tarification</div>
+          <div class="recu-row"><span class="recu-key">Prix appareil</span><span class="recu-val" id="r-prix">—</span></div>
+          <div class="recu-row" id="r-liv-row" style="display:none;"><span class="recu-key">Frais livraison</span><span class="recu-val" id="r-liv">—</span></div>
+          <div class="recu-row" id="r-exp-frais-row" style="display:none;"><span class="recu-key">Frais expédition</span><span class="recu-val" id="r-exp-frais-v">—</span></div>
+          <div class="recu-total-row">
+            <span class="recu-total-key">💵 TOTAL À PAYER</span>
+            <span class="recu-total-val" id="r-total">—</span>
+          </div>
+        </div>
+
+        <!-- Paiement -->
+        <div class="recu-section" id="r-pay-sec" style="display:none;">
+          <div class="recu-divider"></div>
+          <div class="recu-stitle">💳 Mode de paiement</div>
+          <div class="recu-row"><span class="recu-key">Méthode</span><span class="recu-val" id="r-paiement">—</span></div>
+        </div>
+
+        <!-- Expédition -->
+        <div class="recu-section" id="r-exp-sec" style="display:none;">
+          <div class="recu-divider"></div>
+          <div class="recu-stitle">📦 Expédition <span class="exp-badge">HORS ABIDJAN</span></div>
+          <div class="recu-row" id="r-exp-ville-row"><span class="recu-key">Destination</span><span class="recu-val" id="r-exp-ville-v">—</span></div>
+          <div class="recu-row" id="r-exp-transport-row"><span class="recu-key">Transporteur</span><span class="recu-val" id="r-exp-transport-v">—</span></div>
+          <div class="recu-row" id="r-exp-note-row"><span class="recu-key">Instructions</span><span class="recu-val" id="r-exp-note-v">—</span></div>
+        </div>
+
+        <!-- Notes -->
+        <div class="recu-section" id="r-notes-sec" style="display:none;">
+          <div class="recu-divider"></div>
+          <div class="recu-stitle">📝 Notes</div>
+          <div style="font-size:12px;color:var(--text);line-height:1.6;" id="r-notes-v"></div>
+        </div>
+
+      </div><!-- /recu-body -->
+
+      <!-- FOOTER -->
+      <div class="recu-footer">
+        <div class="recu-footer-txt">
+          🏪 <strong style="color:var(--gold)">BG Market</strong> — Votre partenaire téléphonie<br>
+          Ce bon de commande fait office de confirmation de commande
+        </div>
+      </div>
+    </div><!-- /recu-wrap -->
+
+    <!-- ACTIONS -->
+    <button class="btn btn-wa" onclick="sendWA()">📲 Envoyer par WhatsApp</button>
+    <div class="btn2row">
+      <button class="btn btn-outline" onclick="copyText()">📋 Copier le texte</button>
+      <button class="btn btn-outline" onclick="saveCmd()">💾 Sauvegarder</button>
+    </div>
+    <button class="btn btn-red" onclick="newCmd()">➕ Nouvelle commande</button>
+  </div>
+</div>
+
+<!-- ===== PAGE HISTORIQUE ===== -->
+<div class="page" id="pg-hist">
+  <div class="empty" id="hist-empty">
+    <div class="empty-ico">🕒</div>
+    <div class="empty-txt">Aucune commande sauvegardée</div>
+  </div>
+  <div id="hist-list"></div>
+</div>
+
+<script>
+var cmdData = null;
+var hist = [];
+var expOn = false;
+var payMode = '';
+var cmdNum = 1;
+
+try { hist = JSON.parse(localStorage.getItem('bg_cmd_hist') || '[]'); } catch(e){}
+try { cmdNum = parseInt(localStorage.getItem('bg_cmd_num') || '1'); } catch(e){}
+
+// SPLASH
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    var s = document.getElementById('splash');
+    s.classList.add('hide');
+    setTimeout(function(){ s.style.display='none'; }, 700);
+  }, 2000);
+  renderHist();
+});
+
+// TABS
+function goTab(name, el) {
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('pg-' + name).classList.add('active');
+  if(el) el.classList.add('active');
+}
+function goTabByName(name) {
+  var map = {'form':0,'recu':1,'hist':2};
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('pg-' + name).classList.add('active');
+  var tabs = document.querySelectorAll('.tab');
+  if(map[name]!==undefined && tabs[map[name]]) tabs[map[name]].classList.add('active');
+}
+
+// CALCUL TOTAL
+function calcTotal() {
+  var prix = parseFloat(document.getElementById('f-prix').value) || 0;
+  var liv = parseFloat(document.getElementById('f-livraison').value) || 0;
+  var exp = expOn ? (parseFloat(document.getElementById('f-exp-frais').value) || 0) : 0;
+  var total = prix + liv + exp;
+  document.getElementById('total-display').textContent = fF(total);
+}
+
+// PAIEMENT
+function selectPay(el, val) {
+  document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
+  el.classList.add('active');
+  payMode = val;
+  document.getElementById('f-paiement').value = val;
+}
+
+// EXPEDITION
+function toggleExp() {
+  expOn = !expOn;
+  var toggle = document.getElementById('exp-toggle');
+  var block = document.getElementById('exp-block');
+  toggle.classList.toggle('on', expOn);
+  block.classList.toggle('show', expOn);
+  calcTotal();
+}
+
+// FORMAT
+function fF(n) { return Math.round(n).toLocaleString('fr-FR') + ' F'; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function getNumStr(n) { return String(n).padStart(3,'0'); }
+
+// GENERER RECU
+function genRecu() {
+  var nom = document.getElementById('f-nom').value.trim();
+  var tel = document.getElementById('f-tel').value.trim();
+  var modele = document.getElementById('f-modele').value.trim();
+  var prix = parseFloat(document.getElementById('f-prix').value) || 0;
+
+  if(!nom){ alert('⚠️ Entrez le nom du client'); return; }
+  if(!tel){ alert('⚠️ Entrez le téléphone du client'); return; }
+  if(!modele){ alert('⚠️ Entrez le modèle du téléphone'); return; }
+  if(!prix){ alert('⚠️ Entrez le prix de l\'appareil'); return; }
+
+  var ville = document.getElementById('f-ville').value.trim();
+  var stockage = document.getElementById('f-stockage').value;
+  var ram = document.getElementById('f-ram').value;
+  var couleur = document.getElementById('f-couleur').value.trim();
+  var livFrais = parseFloat(document.getElementById('f-livraison').value) || 0;
+  var paiement = payMode;
+  var notes = document.getElementById('f-notes').value.trim();
+  var expVille = expOn ? document.getElementById('f-exp-ville').value.trim() : '';
+  var expTransport = expOn ? document.getElementById('f-exp-transport').value.trim() : '';
+  var expFrais = expOn ? (parseFloat(document.getElementById('f-exp-frais').value) || 0) : 0;
+  var expNote = expOn ? document.getElementById('f-exp-note').value.trim() : '';
+  var total = prix + livFrais + expFrais;
+  var now = new Date();
+  var numStr = 'CMD-' + getNumStr(cmdNum);
+  var dateStr = now.toLocaleDateString('fr-FR');
+  var heureStr = now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+
+  cmdData = { num:numStr, nom, tel, ville, modele, stockage, ram, couleur, prix, livFrais, expFrais, total, paiement, expOn, expVille, expTransport, expNote, notes, date:dateStr, heure:heureStr };
+
+  // Remplir le reçu
+  document.getElementById('r-num').textContent = numStr;
+  document.getElementById('r-numv').textContent = numStr;
+  document.getElementById('r-date').textContent = dateStr;
+  document.getElementById('r-heure').textContent = heureStr;
+  document.getElementById('r-nom').textContent = nom;
+  document.getElementById('r-tel').textContent = tel;
+  setRow('r-ville-row', 'r-ville', ville);
+  document.getElementById('r-modele').textContent = modele;
+  setRow('r-stockage-row', 'r-stockage', stockage);
+  setRow('r-ram-row', 'r-ram', ram);
+  setRow('r-couleur-row', 'r-couleur', couleur);
+  document.getElementById('r-prix').textContent = fF(prix);
+  if(livFrais > 0){ document.getElementById('r-liv-row').style.display='flex'; document.getElementById('r-liv').textContent = fF(livFrais); } else { document.getElementById('r-liv-row').style.display='none'; }
+  if(expFrais > 0){ document.getElementById('r-exp-frais-row').style.display='flex'; document.getElementById('r-exp-frais-v').textContent = fF(expFrais); } else { document.getElementById('r-exp-frais-row').style.display='none'; }
+  document.getElementById('r-total').textContent = fF(total);
+
+  // Paiement
+  if(paiement) {
+    document.getElementById('r-pay-sec').style.display='block';
+    var cls = 'mode-livraison';
+    if(paiement.includes('Orange')) cls='mode-orange';
+    else if(paiement.includes('MTN')) cls='mode-mtn';
+    else if(paiement.includes('Wave')) cls='mode-wave';
+    else if(paiement.includes('Moov')) cls='mode-moov';
+    document.getElementById('r-paiement').innerHTML = '<span class="mode-badge '+cls+'">'+esc(paiement)+'</span>';
+  } else { document.getElementById('r-pay-sec').style.display='none'; }
+
+  // Expédition
+  if(expOn) {
+    document.getElementById('r-exp-sec').style.display='block';
+    setRow('r-exp-ville-row','r-exp-ville-v', expVille);
+    setRow('r-exp-transport-row','r-exp-transport-v', expTransport);
+    setRow('r-exp-note-row','r-exp-note-v', expNote);
+  } else { document.getElementById('r-exp-sec').style.display='none'; }
+
+  // Notes
+  if(notes) {
+    document.getElementById('r-notes-sec').style.display='block';
+    document.getElementById('r-notes-v').textContent = notes;
+  } else { document.getElementById('r-notes-sec').style.display='none'; }
+
+  document.getElementById('recu-empty').style.display='none';
+  document.getElementById('recu-container').style.display='block';
+  goTabByName('recu');
+}
+
+function setRow(rowId, valId, val) {
+  var row = document.getElementById(rowId);
+  var el = document.getElementById(valId);
+  if(val) { row.style.display='flex'; el.textContent=val; }
+  else { row.style.display='none'; }
+}
+
+// ENVOYER WHATSAPP
+function sendWA() {
+  if(!cmdData) return;
+  var d = cmdData;
+  var msg = '🏪 *BG MARKET — BON DE COMMANDE*\n';
+  msg += '━━━━━━━━━━━━━━━━━━━━━━━━\n';
+  msg += '📋 *' + d.num + '* | ' + d.date + ' à ' + d.heure + '\n';
+  msg += '━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+  msg += '👤 *CLIENT*\n';
+  msg += '• Nom : ' + d.nom + '\n';
+  msg += '• Tél : ' + d.tel + '\n';
+  if(d.ville) msg += '• Ville : ' + d.ville + '\n';
+  msg += '\n📱 *PRODUIT*\n';
+  msg += '• Modèle : *' + d.modele + '*\n';
+  if(d.stockage) msg += '• Stockage : ' + d.stockage + '\n';
+  if(d.ram) msg += '• RAM : ' + d.ram + '\n';
+  if(d.couleur) msg += '• Couleur : ' + d.couleur + '\n';
+  msg += '\n💰 *TARIFICATION*\n';
+  msg += '• Prix appareil : ' + fF(d.prix) + '\n';
+  if(d.livFrais > 0) msg += '• Livraison : ' + fF(d.livFrais) + '\n';
+  if(d.expFrais > 0) msg += '• Expédition : ' + fF(d.expFrais) + '\n';
+  msg += '• *TOTAL : ' + fF(d.total) + '*\n';
+  if(d.paiement) msg += '\n💳 *Paiement : ' + d.paiement + '*\n';
+  if(d.expOn) {
+    msg += '\n📦 *EXPÉDITION HORS ABIDJAN*\n';
+    if(d.expVille) msg += '• Destination : ' + d.expVille + '\n';
+    if(d.expTransport) msg += '• Transporteur : ' + d.expTransport + '\n';
+    if(d.expNote) msg += '• Instructions : ' + d.expNote + '\n';
+  }
+  if(d.notes) msg += '\n📝 *Notes :* ' + d.notes + '\n';
+  msg += '\n━━━━━━━━━━━━━━━━━━━━━━━━\n_Envoyé via BG Market_';
+
+  var url = 'https://wa.me/?text=' + encodeURIComponent(msg);
+  window.open(url, '_blank');
+}
+
+// COPIER TEXTE
+function copyText() {
+  if(!cmdData) return;
+  var d = cmdData;
+  var msg = 'BG MARKET — BON DE COMMANDE\n';
+  msg += d.num + ' | ' + d.date + '\n\n';
+  msg += 'CLIENT : ' + d.nom + ' | ' + d.tel + '\n';
+  if(d.ville) msg += 'Ville : ' + d.ville + '\n';
+  msg += '\nPRODUIT : ' + d.modele;
+  if(d.stockage) msg += ' | ' + d.stockage;
+  if(d.ram) msg += ' | ' + d.ram;
+  if(d.couleur) msg += ' | ' + d.couleur;
+  msg += '\n\nPRIX : ' + fF(d.prix);
+  if(d.livFrais > 0) msg += ' + Livraison ' + fF(d.livFrais);
+  if(d.expFrais > 0) msg += ' + Expédition ' + fF(d.expFrais);
+  msg += '\nTOTAL : ' + fF(d.total);
+  if(d.paiement) msg += '\nPaiement : ' + d.paiement;
+  if(d.expOn) { msg += '\nEXPÉDITION → ' + (d.expVille||'') + (d.expTransport?' via '+d.expTransport:''); }
+  if(d.notes) msg += '\nNotes : ' + d.notes;
+
+  var btn = event.currentTarget;
+  if(navigator.clipboard) {
+    navigator.clipboard.writeText(msg).then(function(){ btn.textContent='✅ Copié !'; setTimeout(function(){ btn.textContent='📋 Copier le texte'; },2000); });
+  } else {
+    var ta=document.createElement('textarea'); ta.value=msg; ta.style.cssText='position:fixed;opacity:0;';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    btn.textContent='✅ Copié !'; setTimeout(function(){ btn.textContent='📋 Copier le texte'; },2000);
+  }
+}
+
+// SAUVEGARDER
+function saveCmd() {
+  if(!cmdData) return;
+  var entry = Object.assign({}, cmdData, { savedAt: Date.now() });
+  hist.unshift(entry);
+  if(hist.length > 50) hist = hist.slice(0, 50);
+  cmdNum++;
+  try { localStorage.setItem('bg_cmd_hist', JSON.stringify(hist)); localStorage.setItem('bg_cmd_num', cmdNum); } catch(e){}
+  renderHist();
+  var btn = event.currentTarget;
+  btn.textContent = '✅ Sauvegardé !';
+  setTimeout(function(){ btn.textContent = '💾 Sauvegarder'; }, 2000);
+}
+
+// NOUVELLE COMMANDE
+function newCmd() {
+  resetForm();
+  goTabByName('form');
+}
+
+// RESET
+function resetForm() {
+  var ids = ['f-nom','f-tel','f-ville','f-modele','f-couleur','f-prix','f-livraison','f-notes','f-exp-ville','f-exp-transport','f-exp-frais','f-exp-note'];
+  ids.forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('f-stockage').value = '';
+  document.getElementById('f-ram').value = '';
+  document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
+  payMode = '';
+  if(expOn) toggleExp();
+  document.getElementById('total-display').textContent = '0 F';
+}
+
+// HISTORIQUE
+function renderHist() {
+  var el = document.getElementById('hist-list');
+  var empty = document.getElementById('hist-empty');
+  if(!hist.length){ empty.style.display='block'; el.innerHTML=''; return; }
+  empty.style.display='none';
+  var html = '';
+  hist.forEach(function(h, i) {
+    html += '<div class="hitem">' +
+      '<div class="hitem-top">' +
+        '<div><div class="hitem-name">' + esc(h.nom) + '</div>' +
+        '<div class="hitem-model">' + esc(h.modele) + (h.stockage?' · '+h.stockage:'') + (h.couleur?' · '+h.couleur:'') + '</div></div>' +
+        '<span class="tag">' + esc(h.num) + '</span>' +
+      '</div>' +
+      '<div class="hitem-meta">' + h.date + ' à ' + h.heure + ' · <strong style="color:var(--gold2)">' + fF(h.total) + '</strong></div>' +
+      (h.paiement ? '<div style="margin-top:4px;font-size:11px;color:var(--muted)">💳 '+esc(h.paiement)+'</div>' : '') +
+      (h.expOn ? '<div style="margin-top:4px;"><span class="exp-badge">📦 Expédition → '+esc(h.expVille||'')+'</span></div>' : '') +
+      '<div class="hitem-actions">' +
+        '<button class="small-btn" style="color:#25D366;border-color:#25D366;" onclick="replayWA('+i+')">📲 WhatsApp</button>' +
+        '<button class="small-btn" style="color:var(--red);border-color:var(--red);" onclick="delCmd('+i+')">🗑️ Suppr.</button>' +
+      '</div>' +
+    '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function replayWA(i) {
+  cmdData = hist[i];
+  sendWA();
+}
+
+function delCmd(i) {
+  if(!confirm('Supprimer cette commande ?')) return;
+  hist.splice(i, 1);
+  try { localStorage.setItem('bg_cmd_hist', JSON.stringify(hist)); } catch(e){}
+  renderHist();
+}
+
+// PWA
+(function() {
+  function mkIcon(sz) {
+    var c=document.createElement('canvas'); c.width=c.height=sz;
+    var x=c.getContext('2d');
+    var g=x.createLinearGradient(0,0,sz,sz); g.addColorStop(0,'#1a1a2e'); g.addColorStop(1,'#0d0d1a');
+    x.fillStyle=g; var r=sz*.22;
+    x.beginPath(); x.moveTo(r,0); x.lineTo(sz-r,0); x.quadraticCurveTo(sz,0,sz,r);
+    x.lineTo(sz,sz-r); x.quadraticCurveTo(sz,sz,sz-r,sz);
+    x.lineTo(r,sz); x.quadraticCurveTo(0,sz,0,sz-r);
+    x.lineTo(0,r); x.quadraticCurveTo(0,0,r,0); x.closePath(); x.fill();
+    x.strokeStyle='#c9a84c'; x.lineWidth=sz*.04; x.stroke();
+    x.fillStyle='#c9a84c'; x.font='bold '+Math.round(sz*.28)+'px serif';
+    x.textAlign='center'; x.textBaseline='middle'; x.fillText('BG',sz/2,sz*.36);
+    x.fillStyle='#f0d080'; x.font='bold '+Math.round(sz*.10)+'px sans-serif';
+    x.fillText('MARKET',sz/2,sz*.57);
+    x.fillStyle='rgba(201,168,76,.6)'; x.font=Math.round(sz*.08)+'px sans-serif';
+    x.fillText('COMMANDES',sz/2,sz*.74);
+    return c.toDataURL('image/png');
+  }
+  var ic=mkIcon(192), ic2=mkIcon(512);
+  var al=document.createElement('link'); al.rel='apple-touch-icon'; al.href=ic; document.head.appendChild(al);
+  var mf={name:'BG Market Commandes',short_name:'BG Commandes',display:'standalone',background_color:'#0d0d1a',theme_color:'#c9a84c',start_url:'./',orientation:'portrait',icons:[{src:ic,sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:ic2,sizes:'512x512',type:'image/png',purpose:'any maskable'}]};
+  var mb=new Blob([JSON.stringify(mf)],{type:'application/json'});
+  var ml=document.createElement('link'); ml.rel='manifest'; ml.href=URL.createObjectURL(mb); document.head.appendChild(ml);
+  if('serviceWorker' in navigator){
+    var sw="self.addEventListener('install',function(e){self.skipWaiting();});self.addEventListener('fetch',function(e){e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request);}));});";
+    navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'})),{scope:'./'}).catch(function(){});
+  }
+})();
+</script>
+</body>
+</html>
